@@ -1,6 +1,6 @@
 {
   "name": "react-sitecore-personalize",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "React Sitecore Personalize Module",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

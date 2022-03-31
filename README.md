@@ -1,7 +1,7 @@
 # react-sitecore-personalize
 ### React Sitecore Personalize Module
 
-The [Sitecore Personalize](https://www.sitecore.com/knowledge-center/digital-marketing-resources/what-is-a-cdp) react module is a wrapper for Sitecore Boever [Direct Client Script](https://doc.sitecore.com/cdp/en/developers/sitecore-customer-data-platform--data-model-2-1/javascript-tagging-examples-for-web-pages.html) allowing you to add this script to react based apps. Making it easier for you to get started Personalizing your react based apps and sending events to Sitecore Personalize.
+The [Sitecore Personalize](https://www.sitecore.com/knowledge-center/digital-marketing-resources/what-is-a-cdp) react module is a wrapper for Sitecore Boxever [Direct Client Script](https://doc.sitecore.com/cdp/en/developers/sitecore-customer-data-platform--data-model-2-1/javascript-tagging-examples-for-web-pages.html) allowing you to add this script to react based apps. Making it easier for you to get started Personalizing your react based apps and sending events to Sitecore Personalize.
 
 ## Installation
 
@@ -24,7 +24,9 @@ yarn add react-sitecore-personalize
 - cookieDomain - Your top level cookie domain of the website that is being integrated e.g ".example.com" and not "www.example.com".
 - apiEndpoint - Your API target endpoint specific to your data center region. [Europe](https://api.boxever.com/v1.2), [United States](https://api-us.boxever.com/v1.2), [Asia Pacific](https://api-ap-southeast-2-production.boxever.com/v1.2)
 - clientVersion - Client Versions the [Release Notes JS Library](https://doc.sitecore.com/cdp/en/developers/sitecore-customer-data-platform--data-model-2-1/release-notes-for-javascript-library.html) provides the available versions. 
-- eventSettings - Common Event properties LogEvents: enable/disable console logs, Pos: Your Point Of Sale, Currency: Currency used in POS ex 'USD', Language: Language in use ex 'EN', Channel: The channel captured ex 'WEB'.  
+- pointOfSale - This is the pointOfSale configured for the tenant.
+- webFlowTarget - This is the path for the Amazon CloudFront Content Delivery Network (CDN) for Sitecore Personalize.
+- eventSettings - Common Event properties LogEvents: enable/disable console logs, Currency: Currency used in POS ex 'USD', Language: Language in use ex 'EN', Channel: The channel captured ex 'WEB'.  
 
 ```js
 import { useEffect } from 'react'
@@ -33,7 +35,7 @@ import { initClientScript } from 'react-sitecore-personalize'
 export default function MyApp({ Component, pageProps }: AppProps) {
 ...
     useEffect(()=>{
-        initClientScript('[Your api clientKey]','[domain]','https://api.boxever.com/v1.2','1.4.6', {LogEvents:true,Pos:'[your point of sale]',Currency:'USD',Language:'EN',Channel:'WEB'})
+        initClientScript('[Your api clientKey]','[domain]','https://api.boxever.com/v1.2','1.4.6','[your point of sale]','https://d1mj578wat5n4o.cloudfront.net', {LogEvents:true,Currency:'USD',Language:'EN',Channel:'WEB'})
     })
 ...
 }
