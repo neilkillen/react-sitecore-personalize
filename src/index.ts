@@ -1,5 +1,5 @@
 /**
- * React Sitecore Personalize  Module
+ * React Sitecore Personalize Module
  *
  * @package react-sitecore-personalize
  * @author  Neil Killen <neil.killen@gmail.com>
@@ -11,10 +11,8 @@ declare global {
         _boxever: any; 
         Boxever: any; 
         _boxeverq: any;
-        _currency:string;
-        _channel:string;
-        _language:string;
-        _eventSettings:{LogEvents:boolean,Pos:string,Currency:string,Language:string,Channel:string};
+        _boxever_settings: any;
+        _eventSettings:{LogEvents:boolean,Currency:string,Language:string,Channel:string};
     }
 }
 
@@ -83,19 +81,18 @@ function validateParam(object: any, paramName:string, paramValue:any){
 }
 
 const DirectClientScript = {
-    tags: function ({clientKey, apiEndpoint, cookieDomain, clientVersion, pos}:any) {
-      if (!clientKey) warn('Client Key is required')
-      if (!apiEndpoint) warn('Api Endpoint is required')
-      if (!cookieDomain) warn('Cookie Domain is required')
-      if (!clientVersion) warn('Client Version is required')
-      if (!pos) warn('Point of Sale is required')
-      
-      const script = `var _boxeverq=_boxeverq||[],_boxever_settings={client_key:"${clientKey}",target:"${apiEndpoint}",cookie_domain:"${cookieDomain}",pointOfSale:"${pos}",web_flow_target:"https://d35vb5cccm4xzp.cloudfront.net"};
-      !function(){var e=document.createElement("script");
-      e.type="text/javascript",e.async=!0,e.src="https://d1mj578wat5n4o.cloudfront.net/boxever-${clientVersion}.min.js";
-      var t=document.getElementsByTagName("script")[0];
-      t.parentNode.insertBefore(e,t)}();`
+    tags: function ({clientKey, apiEndpoint, cookieDomain, clientVersion, pos, webFlowTarget}:any) {
+        if (!clientKey || clientKey.length === 0) warn('Client Key is required')
+        if (!apiEndpoint || apiEndpoint.length === 0) warn('Api Endpoint is required')
+        if (!clientVersion || clientVersion.length === 0) warn('Client Version is required')
+        if (!pos || pos.length === 0) warn('Point of Sale is required')
 
+    const script = `var _boxeverq=_boxeverq||[],_boxever_settings={client_key:"${clientKey}",target:"${apiEndpoint}",cookie_domain:"${cookieDomain}",pointOfSale:"${pos}",web_flow_target:"${webFlowTarget}"};
+       !function(){var e=document.createElement("script");
+       e.type="text/javascript",e.async=!0,e.src="https://d1mj578wat5n4o.cloudfront.net/boxever-${clientVersion}.min.js";
+       var t=document.getElementsByTagName("script")[0];
+       t.parentNode.insertBefore(e,t)}();`
+        
       return {
         script
       }
@@ -117,7 +114,7 @@ function baseEvent(page:string, type:string){
     }
     const baseEvent: LooseObject = {
         browser_id: window.Boxever.getID(),
-        pos: window._eventSettings.Pos,
+        pos: window._boxever_settings.pointOfSale,
         channel: window._eventSettings.Channel,
         language: window._eventSettings.Language,
         currency: window._eventSettings.Currency,
@@ -137,14 +134,14 @@ function baseEvent(page:string, type:string){
  * @param cookieDomain - Your top level cookie domain of the website that is being integrated e.g ".example.com" and not "www.example.com".
  * @param apiEndpoint - Your API target endpoint specific to your data center region. (United States: https://api-us.boxever.com/v1.2,Europe: https://api.boxever.com/v1.2, Asia Pacific: https://api-ap-southeast-2-production.boxever.com/v1.2,  )
  * @param clientVersion - Client Versions the Release Notes JS Library (https://doc.sitecore.com/cdp/en/developers/sitecore-customer-data-platform--data-model-2-1/release-notes-for-javascript-library.html) provides the available versions.
- * @param eventSettings - Common Event properties LogEvents: enable/disable console logs, Pos: Your Point Of Sale, Currency: Currency used in POS ex 'USD', Language: Language in use ex 'EN', Channel: The channel captured ex 'WEB'.  
+ * @param pointOfSale - This is the pointOfSale configured for the tenant.
+ * @param webFlowTarget - This is the path for the Amazon CloudFront Content Delivery Network (CDN) for Sitecore Personalize.
+ * @param eventSettings - Common Event properties LogEvents: enable/disable console logs, Currency: Currency used ex 'USD', Language: Language in use ex 'EN', Channel: The channel captured ex 'WEB'.  
 */
-export function initClientScript(clientKey:string, cookieDomain:string, apiEndpoint:string, clientVersion:string, eventSettings:{LogEvents:boolean,Pos:string,Currency:string,Language:string,Channel:string}) {
+export function initClientScript(clientKey:string, cookieDomain:string, apiEndpoint:string, clientVersion:string, pointOfSale:string, webFlowTarget:string, eventSettings:{LogEvents:boolean,Currency:string,Language:string,Channel:string}) {
     // configure event settings 
     window._eventSettings = eventSettings;
-    
     const existingScript = document.getElementById('boxeverclientscript');
-
     if (!existingScript) {
         // initialize the Script tag
         const cdpSnippet = DirectClientScript.tags({
@@ -152,9 +149,9 @@ export function initClientScript(clientKey:string, cookieDomain:string, apiEndpo
             apiEndpoint: apiEndpoint,
             cookieDomain: cookieDomain,
             clientVersion: clientVersion,
-            pos:eventSettings.Pos
+            pos:pointOfSale,
+            webFlowTarget:webFlowTarget
         })
-        
         // create the Script element
         const script = () => {
         const script = document.createElement('script')
@@ -162,7 +159,6 @@ export function initClientScript(clientKey:string, cookieDomain:string, apiEndpo
         script.innerHTML = cdpSnippet.script
         return script
         }
-        //document.body.insertBefore(script(), document.body.childNodes[0])
         document.body.appendChild(script())
     }
   }
