@@ -190,7 +190,7 @@ export function initClientScript(clientKey:string, cookieDomain:string, apiEndpo
  * @param qty - The number of unit added. Total price of the product is calculated by unit price multiplied by quantity. Required
  * @param price - The unit price of the product. Total price of the product is calculated by unit price multiplied by quantity. 
  */
-export function sendAddEvent(page:string,productType:string, itemId: string, productName:string, productId:string, orderDate:string, qty:number, price: string) {
+export function sendAddEvent(page:string,productType:string, itemId: string, productName:string, productId:string, orderDate:string, qty:number, price:number) {
     if(!window._boxever) return
     window._boxeverq.push(function() {
         let addEvent =  baseEvent(page, EventType.Add) 
