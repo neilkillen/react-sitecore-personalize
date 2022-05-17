@@ -8,6 +8,7 @@
 //#region Common
 declare global {
     interface Window { 
+        _clientKey: any;
         _boxever: any; 
         Boxever: any; 
         _boxeverq: any;
@@ -141,6 +142,8 @@ function baseEvent(page:string, type:string){
 export function initClientScript(clientKey:string, cookieDomain:string, apiEndpoint:string, clientVersion:string, pointOfSale:string, webFlowTarget:string, eventSettings:{LogEvents:boolean,Currency:string,Language:string,Channel:string}) {
     // configure event settings 
     window._eventSettings = eventSettings;
+    window._clientKey = clientKey;
+
     const existingScript = document.getElementById('boxeverclientscript');
     if (!existingScript) {
         // initialize the Script tag
@@ -279,7 +282,7 @@ export function sendPaymentEvent(page:string,paymentType:PaymentType) {
  * @param [postalCode] - The postal code of the guest. Optional
  */
 export function sendIdentityByEmailEvent(page:string, email:string, title?:string, firstName?:string, lastName?:string, 
-    gender?:string, dob?:string, mobile?:string,phone?:string,street?:string,city?:string,state?:string,country?:string,postalCode?:string) {
+    gender?:string, dob?:string, mobile?:string,phone?:string,street?:string,city?:string,state?:string,country?:string,postalCode?:string, callback?: any) {
     if(!window._boxever) return
     window._boxeverq.push(function() {
         let identityEvent = baseEvent(page, EventType.Identity) 
@@ -301,7 +304,7 @@ export function sendIdentityByEmailEvent(page:string, email:string, title?:strin
         identityEvent = validateParam(identityEvent, 'country', country)
         identityEvent = validateParam(identityEvent, 'postal_code', postalCode);;
         logEvent(EventType.Identity, identityEvent)
-        window.Boxever.eventCreate(identityEvent, function(data:any) {}, "json");
+        window.Boxever.eventCreate(identityEvent, callback?callback:function(data:any) {}, "json");
     });
 }
 
@@ -323,3 +326,67 @@ export function sendSearchEvent(page:string,productName:string,productType:strin
     });
 }
 //#endregion Event Functions
+
+//#region Execute Experience Functions
+/**
+  * Contribution: Naim Alkouki <alkoky@gmail.com>|<naim.al@americaneagle.com>
+ */
+
+export enum LogType {
+    Experience = "Experience",
+    Other = "Other"
+}
+
+/**
+ * Logs 
+ * @param type 
+ * @param data
+ */
+
+ function log(type:any, data:any) {
+     //we should rename LogEvents to Log 
+    if(!window._eventSettings.LogEvents) return
+
+    console.log(`[react-sitecore-personalize] Sending ${type} `, data);
+}
+
+function baseContext(page:string, friendlyId:string){
+    interface LooseObject {
+        [key: string]: any
+    }
+    const baseEvent: LooseObject = {
+        context: {
+            browserId: window.Boxever.getID(),
+            pos: window._boxever_settings.pointOfSale,
+            channel: window._eventSettings.Channel,
+            language: window._eventSettings.Language,
+            currency: window._eventSettings.Currency,
+            page: page,
+			clientKey: window._clientKey,
+            friendlyId: friendlyId
+		  }
+    };
+    return baseEvent;
+}
+
+/** Run experiences & experments by sending callFlows request to Sitecore Boxever using Direct Client Script
+ * for more info
+ * https://doc.sitecore.com/cdp/en/developers/sitecore-customer-data-platform--data-model-2-1/running-experiments-using-ids-in-sitecore-cdp-rest-api.html
+ * 
+ * @param page - The name of the webpage the guest visited.
+ * @param friendlyId  - The experience/experiment ID
+ * @param callback  -callback funtion
+ * @returns 
+ */
+export function executeExperience(page:string,friendlyId:string, callback:any)
+{
+    if(!window._boxever) return
+    
+	var callFlowsContext = baseContext(page, friendlyId);
+	
+    log(LogType.Experience,callFlowsContext ) ;
+
+  	window.Boxever.callFlows(callFlowsContext,callback, 'json');
+
+}
+//#endregion Execute Experience
