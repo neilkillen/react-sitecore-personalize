@@ -282,7 +282,7 @@ export function sendPaymentEvent(page:string,paymentType:PaymentType) {
  * @param [postalCode] - The postal code of the guest. Optional
  */
 export function sendIdentityByEmailEvent(page:string, email:string, title?:string, firstName?:string, lastName?:string, 
-    gender?:string, dob?:string, mobile?:string,phone?:string,street?:string,city?:string,state?:string,country?:string,postalCode?:string) {
+    gender?:string, dob?:string, mobile?:string,phone?:string,street?:string,city?:string,state?:string,country?:string,postalCode?:string, callback?: any) {
     if(!window._boxever) return
     window._boxeverq.push(function() {
         let identityEvent = baseEvent(page, EventType.Identity) 
@@ -304,7 +304,7 @@ export function sendIdentityByEmailEvent(page:string, email:string, title?:strin
         identityEvent = validateParam(identityEvent, 'country', country)
         identityEvent = validateParam(identityEvent, 'postal_code', postalCode);;
         logEvent(EventType.Identity, identityEvent)
-        window.Boxever.eventCreate(identityEvent, function(data:any) {}, "json");
+        window.Boxever.eventCreate(identityEvent, callback?callback:function(data:any) {}, "json");
     });
 }
 
